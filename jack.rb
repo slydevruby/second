@@ -1,87 +1,6 @@
-# User
-class User
-  attr_reader :name, :cards
-
-  def initialize(name, balance = 100)
-    @name = name
-    @balance = balance
-    @cards = []
-  end
-
-  def <<(obj)
-    @cards.push(obj)
-    @cards.flatten!
-  end
-
-  def reset
-    @cards = []
-  end
-
-  def bet(val)
-    @balance -= val
-  end
-
-  def refund(val)
-    @balance += val
-  end
-
-  def points
-    sum = 0
-    @cards.each do |c|
-      if sum <= 21
-        sum += c.value
-      elsif c.value == 11
-        sum += 1
-      end
-    end
-    sum
-  end
-
-  def show_balance
-    puts "#{name}, balance: #{@balance}"
-  end
-
-  def show_cards
-    print "  #{name} cards: ["
-    @cards.each { |c| print "#{c.rank}#{c.suit} " }
-    puts "] points: #{points}"
-  end
-
-  def enough_balance?
-    if @balance.zero?
-      puts "#{name} not enough balance"
-      false
-    else
-      true
-    end
-  end
-end
-
-# Player
-class Player < User
-  def move?
-    print 'Want to [s]kip move, [a]dd a cart, or any key to open cards? '
-    case gets.chomp
-    when /s/
-      :skip
-    when /a/
-      :add
-    else
-      :open
-    end
-  end
-end
-
-# Dealer
-class Dealer < User
-  def show_cards(hide = true)
-    if hide
-      puts "  #{name} cards: [****]"
-    else
-      super()
-    end
-  end
-end
+require_relative 'deck'
+require_relative 'card'
+require_relative 'player'
 
 # BlackJack game
 class Game
@@ -168,46 +87,6 @@ class Game
     end
 
     @players.each(&:show_balance)
-  end
-end
-
-# Card class for a card with a suit, a rank, a value
-class Card
-  attr_reader :suit, :rank, :value
-
-  def initialize(suit, rank, value)
-    @suit = suit
-    @rank = rank
-    @value = value
-  end
-end
-
-# Deck class, creates the desk and shuffles it
-class Deck
-  SUITS = %w[♥ ♣ ♦ ♠].freeze
-  RANKS = %w[2 3 4 5 6 7 8 9 10 J Q K A].freeze
-  VALUES = [2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10, 11].freeze
-  def initialize(deck_size)
-    @cards = []
-    SUITS.cycle(deck_size) do |s|
-      RANKS.each.with_index do |r, i|
-        @cards << Card.new(s, r, VALUES[i])
-      end
-    end
-    @cards.shuffle!
-  end
-
-  def deal(count)
-    @cards.pop(count)
-  end
-
-  def enough_cards?
-    if @cards.size.positive?
-      true
-    else
-      puts 'No card left, quit the game'
-      false
-    end
   end
 end
 
